@@ -5,6 +5,7 @@ import {User} from "@/types/user";
 import {computed, reactive, ref} from "vue";
 import type {FormInstance} from "element-plus";
 import {ElNotification} from "element-plus";
+import router from "@/router";
 
 const userInfoStore = UserInfoStore()
 const is_login = computed(() => userInfoStore.is_login)
@@ -22,8 +23,10 @@ const guest_login = async () => {
 
     ElNotification({
         type: "success",
-        message: `登录成功，游客用户名为：\n${userInfo.username}`
+        message: `登录成功，游客用户名为：\n${username.value}`
     })
+
+    await router.push({path: '/wall/1'})
 }
 
 const loginFormRef = ref<FormInstance>()
@@ -110,7 +113,7 @@ const handleLogin = (formEl: FormInstance | undefined) => {
       <el-button
           @click="guest_login"
           type="warning"
-      >游客登录</el-button>
+      >快速登录</el-button>
     </el-form-item>
 
     <!-- 找回密码 -->

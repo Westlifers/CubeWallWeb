@@ -26,7 +26,7 @@ import MiddleDivider from "@/views/login/components/MiddleDivider.vue";
     display: flex;
     justify-content: center;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .login-view-left, .login-view-right {
@@ -43,6 +43,11 @@ import MiddleDivider from "@/views/login/components/MiddleDivider.vue";
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.login-view-left img {
+    scale: 170%;
+    transform: translateX(10%);
 }
 
 @media (min-width: 1024px) {
@@ -63,7 +68,10 @@ import MiddleDivider from "@/views/login/components/MiddleDivider.vue";
     }
 
     img {
-        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin: auto;
     }
 }
 </style>
