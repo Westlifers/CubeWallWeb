@@ -10,10 +10,13 @@ const baseUrl = 'ws://127.0.0.1:8000/ws/'
 const socket = new WebSocket(baseUrl + 'wall/' + wallName + '/')
 const user_and_doing = ref({})
 const wall = ref([])
+const cubes_done = ref([])
 
 
 socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
+    console.log('receive message from websocket: => ')
+    console.log(message)
 
     switch (message['type']) {
         case 'upgrade_user':
@@ -21,6 +24,9 @@ socket.onmessage = (event) => {
             break
         case 'get_wall':
             wall.value = message['message']
+            break
+        case 'upgrade_cubes_done':
+            cubes_done.value = message['message']
             break
     }
 }
