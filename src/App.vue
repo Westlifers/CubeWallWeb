@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+</script>
+
+<template>
+  <RouterView />
+</template>
+
+<style>
+* {
+    padding: 0;
+    margin: 0;
+}
+#app {
+    width: 100%;
+    min-height: 100vh;
+}
+</style>
