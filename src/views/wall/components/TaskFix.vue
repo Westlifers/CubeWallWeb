@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import {ref} from "vue";
 
 </script>
 
 <template>
-<el-affix position="bottom" :offset="20" >
+<div class="task-fix">
   <el-popover
       :width="300"
       popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10p"
@@ -18,9 +17,13 @@ import {ref} from "vue";
       asdfasdf
     </template>
   </el-popover>
-</el-affix>
+</div>
 </template>
 
 <style scoped>
-
+.task-fix {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
 </style>

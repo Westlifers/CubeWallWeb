@@ -2,6 +2,7 @@
 
 #app {
   font-weight: normal;
+  background-color: var(--yougi-app-container);
 }
 
 a,
@@ -21,9 +22,5 @@ a,
   body {
     display: flex;
     place-items: center;
-  }
-
-  #app {
-    padding: 0 2rem;
   }
 }

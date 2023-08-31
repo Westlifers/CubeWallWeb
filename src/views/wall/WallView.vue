@@ -4,6 +4,7 @@ import TaskFix from "@/views/wall/components/TaskFix.vue";
 import {ref} from "vue";
 import UserList from "@/views/wall/components/UserList.vue";
 import WallShow from "@/views/wall/components/WallShow.vue";
+import UserListFix from "@/views/wall/components/UserListFix.vue";
 
 const wallName = router.currentRoute.value.params.wallname
 const baseUrl = 'ws://127.0.0.1:8000/ws/'
@@ -34,15 +35,15 @@ socket.onmessage = (event) => {
 
 <template>
 <div class="container">
-  <el-row>
-    <el-col :span="4">
-      <UserList :user_and_doing="user_and_doing" />
-    </el-col>
+  <div class="user-list">
+    <UserList :user_and_doing="user_and_doing" />
+  </div>
 
-    <el-col :span="20">
-      <WallShow :wall="wall" :user_and_doing="user_and_doing" />
-    </el-col>
-  </el-row>
+  <div class="wall-show">
+    <WallShow :wall="wall" :user_and_doing="user_and_doing" />
+  </div>
+
+  <UserListFix :user_and_doing="user_and_doing" />
 
   <TaskFix />
 </div>
@@ -50,6 +51,13 @@ socket.onmessage = (event) => {
 
 <style scoped>
 .container {
-    min-height: 100vh;
+    height: 100vh;
 }
+
+.user-list {
+    width: 20%;
+    height: 100%;
+    padding: 10px;
+}
+
 </style>
