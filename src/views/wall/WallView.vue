@@ -52,12 +52,24 @@ socket.onmessage = (event) => {
 <style scoped>
 .container {
     height: 100vh;
+    display: flex;
+    flex-direction: row;
 }
 
 .user-list {
     width: 20%;
     height: 100%;
     padding: 10px;
+}
+
+.wall-show {
+    padding: 10px;
+}
+
+@media (max-width: 1024px) {
+    .user-list {
+        display: none;
+    }
 }
 
 </style>

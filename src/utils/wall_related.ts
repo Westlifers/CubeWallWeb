@@ -14,3 +14,11 @@ export function get_m_n_cube_of_wall(m: number, n: number, wall: number[][]) {
 }
 
 
+export const COLOR_DICT = {
+    0: 'yellow',
+    1: 'white',
+    2: 'red',
+    3: 'orange',
+    4: 'blue',
+    5: 'green',
+}
