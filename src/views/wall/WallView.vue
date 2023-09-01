@@ -69,11 +69,16 @@ socket.onmessage = (event) => {
 
 .wall-show {
     padding: 10px;
+    width: 80%;
 }
 
 @media (max-width: 1024px) {
     .user-list {
         display: none;
+    }
+
+    .wall-show {
+        width: 100%;
     }
 }
 
