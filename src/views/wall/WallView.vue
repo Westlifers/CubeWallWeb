@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import router from "@/router";
 import TaskFix from "@/views/wall/components/TaskFix.vue";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import UserList from "@/views/wall/components/UserList.vue";
 import WallShow from "@/views/wall/components/WallShow.vue";
 import UserListFix from "@/views/wall/components/UserListFix.vue";
+import {get_m_n_cube_of_wall} from "@/utils/wall_related";
 
 const wallName = router.currentRoute.value.params.wallname
 const baseUrl = 'ws://127.0.0.1:8000/ws/'
 const socket = new WebSocket(baseUrl + 'wall/' + wallName + '/')
 const user_and_doing = ref({})
-const wall = ref([])
+const wall = ref([[0]])
 const cubes_done = ref([])
+const my_choice = ref([0, 0])
+const my_task_cube = computed(() => {
+    return get_m_n_cube_of_wall(my_choice.value[0], my_choice.value[1], wall.value)
+})
 
 
 socket.onmessage = (event) => {
@@ -45,7 +50,7 @@ socket.onmessage = (event) => {
 
   <UserListFix :user_and_doing="user_and_doing" />
 
-  <TaskFix />
+  <TaskFix :cube="my_task_cube" />
 </div>
 </template>
 

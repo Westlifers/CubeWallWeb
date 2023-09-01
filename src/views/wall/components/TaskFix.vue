@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import CubeFace from "@/views/wall/components/CubeFace.vue";
+import {get_alg_by_face} from "@/utils/alg_by_face";
 
+const props = defineProps<{
+    cube: number[][]
+}>()
 </script>
 
 <template>
@@ -14,7 +19,8 @@
     </template>
 
     <template #default>
-      asdfasdf
+      <cube-face :cube_matrix="cube" />
+      <p>{{get_alg_by_face(cube)}}</p>
     </template>
   </el-popover>
 </div>

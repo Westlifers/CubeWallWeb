@@ -1,0 +1,4 @@
+export function get_alg_by_face(face) {
+    // here we need a strong algorithm for computing
+    return `${face?'R':'U'}`
+}
