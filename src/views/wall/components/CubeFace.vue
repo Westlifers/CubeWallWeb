@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {COLOR_DICT} from "@/utils/wall_related";
-import {onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 
 const props = defineProps<{
     cube_matrix: number[][]
@@ -10,46 +10,83 @@ const props = defineProps<{
 const scale = ref(1)
 const canvasRef = ref()
 const canvasContainerRef = ref()
-const isDragging = ref(false)
-const startOffsetX = ref(0)
-const startOffsetY = ref(0)
+const STANDARD_CELL_SIZE = 20
+const numRows = computed(() => props.cube_matrix.length)
+const numCols = computed(() => props.cube_matrix[0].length)
+const min_scale = computed(() => {
+    let m = 0.1
+    if (canvasContainerRef.value && canvasContainerRef.value) {
+        m = Math.min(
+            canvasContainerRef.value.clientWidth / (STANDARD_CELL_SIZE * numCols.value),
+            canvasContainerRef.value.clientHeight / (STANDARD_CELL_SIZE * numRows.value))
+    }
+    return m
+})
+const mouse_pos = ref([0, 0])
+const cube_pointed = computed(() => [
+    Math.floor(mouse_pos.value[0] / (STANDARD_CELL_SIZE * scale.value) / 3),
+    Math.floor(mouse_pos.value[1] / (STANDARD_CELL_SIZE * scale.value) / 3)
+])
+
+
+const update_mouse_pos = (e) => {
+    mouse_pos.value = [e.clientX - canvasRef.value.getBoundingClientRect().x,
+        e.clientY - canvasRef.value.getBoundingClientRect().y
+    ]
+}
 
 const drawCubeFace = () => {
     const canvas = canvasRef.value;
     const ctx = canvas.getContext('2d')
-    const cellSize = 20 * scale.value
-    const separationLineWidth = 2 * scale.value; // 分隔线的宽度
+    const cellSize = STANDARD_CELL_SIZE * scale.value
+    const separationLineWidth = 2 * scale.value  // 分隔线的宽度
+    const smallSeparationLineWidth = scale.value  // 小分隔线的宽度
     canvas.width = canvasContainerRef.value.clientWidth
     canvas.height = canvasContainerRef.value.clientHeight
-    const numRows = props.cube_matrix.length;
-    const numCols = props.cube_matrix[0].length;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     for (let i = 0; i < props.cube_matrix.length; i++) {
         for (let j = 0; j < props.cube_matrix[i].length; j++) {
             const value = props.cube_matrix[i][j]
             ctx.fillStyle = COLOR_DICT[value]
+            if ((Math.floor(j / 3) == cube_pointed.value[0]) && Math.floor(i / 3) == cube_pointed.value[1])
+                ctx.globalAlpha = 0.5
+            else ctx.globalAlpha  = 1
             ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize)
         }
     }
 
+    ctx.fillStyle = 'black' // 分隔线的颜色
+
     // 绘制横向分隔线
-    for (let i = 0; i < numRows; i++) {
-        const y = i * (cellSize * 3); // 在每3行之后绘制一条线
-        ctx.fillStyle = 'black'; // 分隔线的颜色
-        ctx.fillRect(0, y - separationLineWidth / 2, canvas.width, separationLineWidth);
+    for (let i = 0; i <= numRows.value; i++) {
+        let y = i * cellSize
+        if (i % 3 == 0) {
+            ctx.fillRect(0, y - separationLineWidth / 2, cellSize * numCols.value, separationLineWidth)
+        }
+
+        ctx.fillRect(0, y - smallSeparationLineWidth / 2, cellSize * numCols.value, smallSeparationLineWidth)
     }
 
     // 绘制纵向分隔线
-    for (let j = 0; j < numCols; j++) {
-        const x = j * (cellSize * 3); // 在每3列之后绘制一条线
-        ctx.fillStyle = 'black'; // 分隔线的颜色
-        ctx.fillRect(x - separationLineWidth / 2, 0, separationLineWidth, canvas.height);
+    for (let j = 0; j <= numCols.value; j++) {
+        let x = j * cellSize
+        if (j % 3 == 0) {
+            ctx.fillRect(x - separationLineWidth / 2, 0, separationLineWidth, cellSize * numRows.value)
+        }
+
+        ctx.fillRect(x - smallSeparationLineWidth / 2, 0, smallSeparationLineWidth, cellSize * numRows.value)
     }
 }
 
 watch(scale, () => {
     drawCubeFace()
+})
+watch(cube_pointed, (value, oldValue) => {
+    if (value.toString() !== oldValue.toString()) {
+        drawCubeFace()
+    }
 })
 
 onMounted(() => {
@@ -59,43 +96,17 @@ onMounted(() => {
 </script>
 
 <template>
-<!--<div class="cube-container">
-  <div class="cube-row" v-for="(row, i) in cube_matrix" :key="i">
-    <div class="cube-item"
-         v-for="(item, j) in cube_matrix[i]"
-         :key="j"
-         :style="{'background-color': COLOR_DICT[item], 'width': `calc(100% / ${row.length})`}">
-      {{item}}
-    </div>
-  </div>
-</div>-->
+
   <div class="cube-canvas-container" ref="canvasContainerRef">
-    <canvas ref="canvasRef" />
+    <canvas ref="canvasRef" @mousemove="update_mouse_pos" />
     <div class="scaler">
-      <el-input-number v-model="scale" :precision="2" :step="0.01" :max="10" :min="0.01" />
+      <el-input-number v-model="scale" :precision="2" :step="0.01" :max="10" :min="min_scale" />
     </div>
   </div>
 
 </template>
 
 <style scoped>
-.cube-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-}
-
-.cube-row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-.cube-item {
-    height: 100%;
-}
-
 .cube-canvas-container {
     width: 100%;
     height: 100%;
