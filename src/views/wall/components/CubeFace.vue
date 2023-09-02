@@ -30,8 +30,8 @@ const min_scale = computed(() => {
 })
 const mouse_pos = ref([0, 0])
 const cube_pointed = computed(() => [
-    Math.floor(mouse_pos.value[0] / (STANDARD_CELL_SIZE * scale.value) / 3),
-    Math.floor(mouse_pos.value[1] / (STANDARD_CELL_SIZE * scale.value) / 3)
+    Math.floor(mouse_pos.value[1] / (STANDARD_CELL_SIZE * scale.value) / 3),
+    Math.floor(mouse_pos.value[0] / (STANDARD_CELL_SIZE * scale.value) / 3)
 ])
 
 
@@ -39,6 +39,18 @@ const update_mouse_pos = (e) => {
     mouse_pos.value = [e.clientX - canvasRef.value.getBoundingClientRect().x,
         e.clientY - canvasRef.value.getBoundingClientRect().y
     ]
+}
+
+const choose = () => {
+    // 越界则不管
+    if (
+        (cube_pointed.value[0] >= props.cubes_done.length) ||
+        (cube_pointed.value[0] < 0) ||
+        (cube_pointed.value[1] >= props.cubes_done[0].length) ||
+        (cube_pointed.value[1] < 0)
+    )
+        return
+    emits('choose', cube_pointed.value)
 }
 
 const drawCubeFace = () => {
@@ -57,7 +69,7 @@ const drawCubeFace = () => {
             const value = props.cube_matrix[i][j]
             ctx.fillStyle = COLOR_DICT[value]
             // 如果绘制的方块处于被指的魔方中则调整透明度
-            if ((Math.floor(j / 3) == cube_pointed.value[0]) && Math.floor(i / 3) == cube_pointed.value[1])
+            if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1])
                 ctx.globalAlpha = 0.3
             // 如果绘制的方块没完成则调整透明度
             else if (!props.cubes_done[Math.floor(j / 3)][Math.floor(i / 3)])
@@ -104,24 +116,12 @@ onMounted(() => {
     drawCubeFace()
 })
 
-addEventListener('click', () => {
-    // 越界则不管
-    if (
-        (cube_pointed.value[0] >= props.cubes_done.length) ||
-        (cube_pointed.value[0] < 0) ||
-        (cube_pointed.value[1] >= props.cubes_done[0].length) ||
-        (cube_pointed.value[1] < 0)
-    )
-        return
-    emits('choose', cube_pointed.value)
-})
-
 </script>
 
 <template>
 
   <div class="cube-canvas-container" ref="canvasContainerRef">
-    <canvas ref="canvasRef" @mousemove="update_mouse_pos" />
+    <canvas ref="canvasRef" @mousemove="update_mouse_pos" @click="choose" />
     <div class="scaler">
       <el-input-number v-model="scale" :precision="2" :step="0.01" :max="10" :min="min_scale" />
     </div>

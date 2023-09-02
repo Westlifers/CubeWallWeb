@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import LoginView from "@/views/login/LoginView.vue";
 import WallView from "@/views/wall/WallView.vue";
 

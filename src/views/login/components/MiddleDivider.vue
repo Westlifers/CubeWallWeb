@@ -3,7 +3,6 @@ import IconCube from "@/components/icons/IconCube.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import DividerItem from "@/views/login/components/DividerItem.vue";
 import IconWall from "@/components/icons/IconWall.vue";
-
 </script>
 
 <template>

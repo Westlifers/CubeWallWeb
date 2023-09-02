@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {get_alg_by_face} from "@/utils/alg_by_face";
 import {COLOR_DICT} from "@/utils/wall_related";
-import {computed} from "vue";
+import {computed, ref} from "vue";
+
+const visible = ref(false)
 
 const cubeSize = computed(() => {
-    console.log(window.innerWidth)
     return Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.6, 100)
 })
 
@@ -18,11 +19,11 @@ defineProps<{
   <el-popover
       :width="100"
       popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10p"
-      trigger="click"
+      :visible="visible"
       placement="left-start"
       >
     <template #reference>
-      <el-avatar src="https://avatars.githubusercontent.com/u/72015883?v=4" />
+      <el-avatar @click="visible = !visible" src="https://avatars.githubusercontent.com/u/72015883?v=4" />
     </template>
 
     <template #default>

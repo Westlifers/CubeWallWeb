@@ -6,6 +6,7 @@ import UserList from "@/views/wall/components/UserList.vue";
 import UserListFix from "@/views/wall/components/UserListFix.vue";
 import {get_m_n_cube_of_wall} from "@/utils/wall_related";
 import CubeFace from "@/views/wall/components/CubeFace.vue";
+import {ElMessage} from "element-plus";
 
 const wallName = router.currentRoute.value.params.wallname
 const baseUrl = 'ws://127.0.0.1:8000/ws/'
@@ -23,12 +24,19 @@ const my_task_cube = computed(() => {
 })
 
 const choose = (choice) => {
-    my_choice.value = choice
-    // 向后端发送选择
-    socket.send(JSON.stringify({
-        'type': 'choose',
-        'pos': choice
-    }))
+    // 仅在选择不一时才真正改变选择，提高效率
+    if (choice.toString() !== my_choice.value.toString()) {
+        my_choice.value = choice
+        // 向后端发送选择
+        socket.send(JSON.stringify({
+            'type': 'choose',
+            'pos': choice
+        }))
+        ElMessage({
+            type: 'success',
+            message: `你选择了第${choice[0] + 1}行第${choice[1] + 1}列的魔方`
+        })
+    }
 }
 
 

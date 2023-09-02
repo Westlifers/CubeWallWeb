@@ -1,6 +1,5 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 import type {User} from "@/types/user";
-import {state} from "vue-tsc/out/shared";
 
 
 export const UserInfoStore = defineStore('userInfo', {
