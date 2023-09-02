@@ -3,20 +3,33 @@ import router from "@/router";
 import TaskFix from "@/views/wall/components/TaskFix.vue";
 import {computed, ref} from "vue";
 import UserList from "@/views/wall/components/UserList.vue";
-import WallShow from "@/views/wall/components/WallShow.vue";
 import UserListFix from "@/views/wall/components/UserListFix.vue";
 import {get_m_n_cube_of_wall} from "@/utils/wall_related";
+import CubeFace from "@/views/wall/components/CubeFace.vue";
 
 const wallName = router.currentRoute.value.params.wallname
 const baseUrl = 'ws://127.0.0.1:8000/ws/'
 const socket = new WebSocket(baseUrl + 'wall/' + wallName + '/')
 const user_and_doing = ref({})
-const wall = ref([[0]])
-const cubes_done = ref([])
+const wall = ref([
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+])
+const cubes_done = ref([[]])
 const my_choice = ref([0, 0])
 const my_task_cube = computed(() => {
     return get_m_n_cube_of_wall(my_choice.value[0], my_choice.value[1], wall.value)
 })
+
+const choose = (choice) => {
+    my_choice.value = choice
+    // 向后端发送选择
+    socket.send(JSON.stringify({
+        'type': 'choose',
+        'pos': choice
+    }))
+}
 
 
 socket.onmessage = (event) => {
@@ -45,7 +58,11 @@ socket.onmessage = (event) => {
   </div>
 
   <div class="wall-show">
-    <WallShow :wall="wall" :user_and_doing="user_and_doing" />
+    <CubeFace
+        :cube_matrix="wall"
+        :user_and_doing="user_and_doing"
+        :cubes_done="cubes_done"
+        @choose="choose" />
   </div>
 
   <UserListFix :user_and_doing="user_and_doing" />

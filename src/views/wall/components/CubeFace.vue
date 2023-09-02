@@ -5,7 +5,13 @@ import {computed, onMounted, ref, watch} from "vue";
 
 const props = defineProps<{
     cube_matrix: number[][]
-}>();
+    user_and_doing: object
+    cubes_done: number[][]
+}>()
+
+const emits = defineEmits<{
+    choose: [choice: number[]]
+}>()
 
 const scale = ref(1)
 const canvasRef = ref()
@@ -50,14 +56,19 @@ const drawCubeFace = () => {
         for (let j = 0; j < props.cube_matrix[i].length; j++) {
             const value = props.cube_matrix[i][j]
             ctx.fillStyle = COLOR_DICT[value]
+            // 如果绘制的方块处于被指的魔方中则调整透明度
             if ((Math.floor(j / 3) == cube_pointed.value[0]) && Math.floor(i / 3) == cube_pointed.value[1])
-                ctx.globalAlpha = 0.5
+                ctx.globalAlpha = 0.3
+            // 如果绘制的方块没完成则调整透明度
+            else if (!props.cubes_done[Math.floor(j / 3)][Math.floor(i / 3)])
+                ctx.globalAlpha = 0
             else ctx.globalAlpha  = 1
             ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize)
         }
     }
 
-    ctx.fillStyle = 'black' // 分隔线的颜色
+    ctx.fillStyle = 'black'
+    ctx.globalAlpha  = 1
 
     // 绘制横向分隔线
     for (let i = 0; i <= numRows.value; i++) {
@@ -91,6 +102,18 @@ watch(cube_pointed, (value, oldValue) => {
 
 onMounted(() => {
     drawCubeFace()
+})
+
+addEventListener('click', () => {
+    // 越界则不管
+    if (
+        (cube_pointed.value[0] >= props.cubes_done.length) ||
+        (cube_pointed.value[0] < 0) ||
+        (cube_pointed.value[1] >= props.cubes_done[0].length) ||
+        (cube_pointed.value[1] < 0)
+    )
+        return
+    emits('choose', cube_pointed.value)
 })
 
 </script>
