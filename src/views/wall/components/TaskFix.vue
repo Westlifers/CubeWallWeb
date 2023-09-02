@@ -9,6 +9,14 @@ const cubeSize = computed(() => {
     return Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.6, 100)
 })
 
+const done = () => {
+    emits('done')
+}
+
+const emits = defineEmits<{
+    done
+}>()
+
 defineProps<{
     cube: number[][]
 }>()
@@ -43,7 +51,7 @@ defineProps<{
       </div>
       <p>{{get_alg_by_face(cube)}}</p>
       <el-button-group>
-        <el-button type="primary">完成</el-button>
+        <el-button type="primary" @click="done">完成</el-button>
         <el-button type="primary">分配</el-button>
       </el-button-group>
     </template>

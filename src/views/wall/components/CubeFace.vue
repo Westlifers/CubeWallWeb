@@ -7,6 +7,7 @@ const props = defineProps<{
     cube_matrix: number[][]
     user_and_doing: object
     cubes_done: number[][]
+    updater: number
 }>()
 
 const emits = defineEmits<{
@@ -14,6 +15,7 @@ const emits = defineEmits<{
 }>()
 
 const scale = ref(1)
+const updater = computed(() => props.updater)
 const canvasRef = ref()
 const canvasContainerRef = ref()
 const STANDARD_CELL_SIZE = 20
@@ -33,6 +35,12 @@ const cube_pointed = computed(() => [
     Math.floor(mouse_pos.value[1] / (STANDARD_CELL_SIZE * scale.value) / 3),
     Math.floor(mouse_pos.value[0] / (STANDARD_CELL_SIZE * scale.value) / 3)
 ])
+const is_pointed_cube_out_of_bound = computed(() =>
+    (cube_pointed.value[0] >= props.cubes_done.length) ||
+    (cube_pointed.value[0] < 0) ||
+    (cube_pointed.value[1] >= props.cubes_done[0].length) ||
+    (cube_pointed.value[1] < 0)
+)
 
 
 const update_mouse_pos = (e) => {
@@ -43,12 +51,7 @@ const update_mouse_pos = (e) => {
 
 const choose = () => {
     // 越界则不管
-    if (
-        (cube_pointed.value[0] >= props.cubes_done.length) ||
-        (cube_pointed.value[0] < 0) ||
-        (cube_pointed.value[1] >= props.cubes_done[0].length) ||
-        (cube_pointed.value[1] < 0)
-    )
+    if (is_pointed_cube_out_of_bound.value)
         return
     emits('choose', cube_pointed.value)
 }
@@ -72,7 +75,7 @@ const drawCubeFace = () => {
             if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1])
                 ctx.globalAlpha = 0.3
             // 如果绘制的方块没完成则调整透明度
-            else if (!props.cubes_done[Math.floor(j / 3)][Math.floor(i / 3)])
+            else if (!props.cubes_done[Math.floor(i / 3)][Math.floor(j / 3)])
                 ctx.globalAlpha = 0
             else ctx.globalAlpha  = 1
             ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize)
@@ -103,11 +106,11 @@ const drawCubeFace = () => {
     }
 }
 
-watch(scale, () => {
+watch([scale, updater], () => {
     drawCubeFace()
 })
 watch(cube_pointed, (value, oldValue) => {
-    if (value.toString() !== oldValue.toString()) {
+    if ((value.toString() !== oldValue.toString()) && !is_pointed_cube_out_of_bound.value) {
         drawCubeFace()
     }
 })

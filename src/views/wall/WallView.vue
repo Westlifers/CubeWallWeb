@@ -22,6 +22,7 @@ const my_choice = ref([0, 0])
 const my_task_cube = computed(() => {
     return get_m_n_cube_of_wall(my_choice.value[0], my_choice.value[1], wall.value)
 })
+const updater = ref(0)
 
 const choose = (choice) => {
     // 仅在选择不一时才真正改变选择，提高效率
@@ -39,6 +40,17 @@ const choose = (choice) => {
     }
 }
 
+const done = () => {
+    socket.send(JSON.stringify({
+        'type': 'done',
+        'pos': my_choice.value
+    }))
+    ElMessage({
+        type: 'success',
+        message: `你完成了第${my_choice.value[0] + 1}行第${my_choice.value[1] + 1}列的魔方`
+    })
+}
+
 
 socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
@@ -48,12 +60,14 @@ socket.onmessage = (event) => {
     switch (message['type']) {
         case 'upgrade_user':
             user_and_doing.value = message['message']
+            updater.value ++
             break
         case 'get_wall':
             wall.value = message['message']
             break
         case 'upgrade_cubes_done':
             cubes_done.value = message['message']
+            updater.value ++
             break
     }
 }
@@ -70,12 +84,13 @@ socket.onmessage = (event) => {
         :cube_matrix="wall"
         :user_and_doing="user_and_doing"
         :cubes_done="cubes_done"
+        :updater="updater"
         @choose="choose" />
   </div>
 
   <UserListFix :user_and_doing="user_and_doing" />
 
-  <TaskFix :cube="my_task_cube" />
+  <TaskFix :cube="my_task_cube" @done="done" />
 </div>
 </template>
 
