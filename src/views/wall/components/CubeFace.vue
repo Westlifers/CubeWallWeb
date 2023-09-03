@@ -147,8 +147,15 @@ const drawCubeFace = () => {
                 ctx.globalAlpha = 0
             else ctx.globalAlpha  = 1
 
-            // 如果绘制的方块是客户端的任务，则标注
-            if ((Math.floor(i / 3) == props.choice[0]) && Math.floor(j / 3) == props.choice[1]) {
+            // 如果绘制的方块是其他人的任务，则标注
+            for (let pos of Object.values(props.user_and_doing)) {
+                if (pos && (pos.toString() == [Math.floor(i / 3), Math.floor(j / 3)].toString())) {
+                    ctx.fillStyle = 'brown'
+                    ctx.globalAlpha = 1
+                }
+            }
+            // 如果绘制的方块是客户端的任务，也标注
+            if ((Math.floor(i / 3) == props.choice[0]) && (Math.floor(j / 3) == props.choice[1])) {
                 ctx.fillStyle = 'purple'
                 ctx.globalAlpha = 1
             }

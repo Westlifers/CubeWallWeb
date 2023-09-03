@@ -3,7 +3,7 @@ import {get_alg_by_face} from "@/utils/alg_by_face";
 import {COLOR_DICT} from "@/utils/wall_related";
 import {computed, ref} from "vue";
 
-const visible = ref(false)
+const visible = ref(true)
 
 const cubeSize = computed(() => {
     return Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.6, 100)
