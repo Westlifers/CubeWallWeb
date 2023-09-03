@@ -20,6 +20,11 @@ const scale = ref(1)
 const updater = computed(() => props.updater)
 const canvasRef = ref()
 const canvasContainerRef = ref()
+const dragStart = ref(false)
+const isDragging = ref(false)
+const posAtDraggingStart = ref([0, 0])  // 记录初始位置
+const lastOffsetPos = ref([0, 0])  // 上次的偏移
+const totalOffsetPos = ref([0, 0])  // 总的偏移
 const STANDARD_CELL_SIZE = 20
 const numRows = computed(() => props.cube_matrix.length)
 const numCols = computed(() => props.cube_matrix[0].length)
@@ -34,8 +39,8 @@ const min_scale = computed(() => {
 })
 const mouse_pos = ref([0, 0])
 const cube_pointed = computed(() => [
-    Math.floor(mouse_pos.value[1] / (STANDARD_CELL_SIZE * scale.value) / 3),
-    Math.floor(mouse_pos.value[0] / (STANDARD_CELL_SIZE * scale.value) / 3)
+    Math.floor((mouse_pos.value[1] - totalOffsetPos.value[1]) / (STANDARD_CELL_SIZE * scale.value) / 3),
+    Math.floor((mouse_pos.value[0] - totalOffsetPos.value[0]) / (STANDARD_CELL_SIZE * scale.value) / 3)
 ])
 const is_pointed_cube_out_of_bound = computed(() =>
     (cube_pointed.value[0] >= props.cubes_done.length) ||
@@ -45,11 +50,37 @@ const is_pointed_cube_out_of_bound = computed(() =>
 )
 
 
-const update_mouse_pos = (e) => {
+const update_mouse_pos_and_drag = (e) => {
+    // 两个功能，一个是更新鼠标坐标，另一个是实现拖拽功能
+    // 1.更新鼠标坐标
     mouse_pos.value = [e.clientX - canvasRef.value.getBoundingClientRect().x,
         e.clientY - canvasRef.value.getBoundingClientRect().y
     ]
+
+    // 2.实现拖拽功能
+    if (dragStart.value) {
+        isDragging.value = true
+        totalOffsetPos.value[0] = lastOffsetPos.value[0] + (e.x - posAtDraggingStart.value[0])
+        totalOffsetPos.value[1] = lastOffsetPos.value[1] + (e.y - posAtDraggingStart.value[1])
+    }
 }
+
+const startDrag = (e) => {
+    dragStart.value = true
+    // 记录初始位置
+    if (!isDragging.value) {
+        posAtDraggingStart.value = [e.x, e.y]
+    }
+}
+
+const endDrag = (e) => {
+    dragStart.value = false
+    isDragging.value = false
+    // lastOffsetPos.value = totalOffsetPos.value  // wrong! 是引用类型!
+    lastOffsetPos.value[0] = totalOffsetPos.value[0]
+    lastOffsetPos.value[1] = totalOffsetPos.value[1]
+}
+
 
 const choose = () => {
     // 越界则不管
@@ -87,6 +118,7 @@ const drawCubeFace = () => {
     canvas.height = canvasContainerRef.value.clientHeight
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.translate(totalOffsetPos.value[0], totalOffsetPos.value[1])
 
     for (let i = 0; i < props.cube_matrix.length; i++) {
         for (let j = 0; j < props.cube_matrix[i].length; j++) {
@@ -146,6 +178,9 @@ watch(cube_pointed, (value, oldValue) => {
         drawCubeFace()
     }
 })
+watch(totalOffsetPos, () => {
+    drawCubeFace()
+})
 
 onMounted(() => {
     drawCubeFace()
@@ -156,7 +191,12 @@ onMounted(() => {
 <template>
 
   <div class="cube-canvas-container" ref="canvasContainerRef">
-    <canvas ref="canvasRef" @mousemove="update_mouse_pos" @click="choose" />
+    <canvas ref="canvasRef"
+            @mousemove="update_mouse_pos_and_drag"
+            @click="choose"
+            @mousedown="startDrag"
+            @mouseup="endDrag"
+    />
     <div class="scaler">
       <el-input-number v-model="scale" :precision="2" :step="0.01" :max="10" :min="min_scale" />
     </div>
