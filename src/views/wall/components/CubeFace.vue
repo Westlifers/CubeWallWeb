@@ -134,11 +134,12 @@ const drawCubeFace = () => {
         for (let j = 0; j < props.cube_matrix[i].length; j++) {
             const value = props.cube_matrix[i][j]
             ctx.fillStyle = COLOR_DICT[value]
-            // 如果绘制的方块处于被指的魔方中则调整透明度
-            if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1]) {
-                // 但如果指中的魔方已完成，或者正在拖拽中，则不调整透明度
-                if (!(props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) && !isDragging.value) {
-                    ctx.globalAlpha = 0.3
+            // 如果绘制的方块处于被指的魔方中，且当前不是在拖拽中，则调整透明度
+            if ((Math.floor(i / 3) == cube_pointed.value[0]) && (Math.floor(j / 3) == cube_pointed.value[1] && !isDragging.value)) {
+                ctx.globalAlpha = 0.3
+                // 但如果指中的魔方已完成，则不调整透明度
+                if (props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) {
+                    ctx.globalAlpha = 1
                 }
             }
             // 如果绘制的方块没完成则调整透明度
@@ -146,7 +147,7 @@ const drawCubeFace = () => {
                 ctx.globalAlpha = 0
             else ctx.globalAlpha  = 1
 
-            // 如果绘制的方块是客户端的任务，则涂黑
+            // 如果绘制的方块是客户端的任务，则标注
             if ((Math.floor(i / 3) == props.choice[0]) && Math.floor(j / 3) == props.choice[1]) {
                 ctx.fillStyle = 'purple'
                 ctx.globalAlpha = 1
