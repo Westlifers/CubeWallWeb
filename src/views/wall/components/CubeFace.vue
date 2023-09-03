@@ -22,6 +22,7 @@ const canvasRef = ref()
 const canvasContainerRef = ref()
 const dragStart = ref(false)
 const isDragging = ref(false)
+const finishDrag = ref(false)  // 标签，用来解决拖动后会选择魔方的问题
 const posAtDraggingStart = ref([0, 0])  // 记录初始位置
 const lastOffsetPos = ref([0, 0])  // 上次的偏移
 const totalOffsetPos = ref([0, 0])  // 总的偏移
@@ -53,9 +54,11 @@ const is_pointed_cube_out_of_bound = computed(() =>
 const update_mouse_pos_and_drag = (e) => {
     // 两个功能，一个是更新鼠标坐标，另一个是实现拖拽功能
     // 1.更新鼠标坐标
-    mouse_pos.value = [e.clientX - canvasRef.value.getBoundingClientRect().x,
-        e.clientY - canvasRef.value.getBoundingClientRect().y
-    ]
+    if (!dragStart.value) {
+        mouse_pos.value = [e.clientX - canvasRef.value.getBoundingClientRect().x,
+            e.clientY - canvasRef.value.getBoundingClientRect().y
+        ]
+    }
 
     // 2.实现拖拽功能
     if (dragStart.value) {
@@ -74,6 +77,9 @@ const startDrag = (e) => {
 }
 
 const endDrag = (e) => {
+    if (isDragging.value) {
+        finishDrag.value = true
+    }
     dragStart.value = false
     isDragging.value = false
     // lastOffsetPos.value = totalOffsetPos.value  // wrong! 是引用类型!
@@ -83,9 +89,13 @@ const endDrag = (e) => {
 
 
 const choose = () => {
-    // 越界则不管
-    if (is_pointed_cube_out_of_bound.value)
+    // 拖拽时不选择
+    if (finishDrag.value) {
+        finishDrag.value = false
         return
+    }
+    // 越界则不管
+    if (is_pointed_cube_out_of_bound.value) return
     // 如果该处已被选择则拒绝选择
     for (let pos of Object.values(props.user_and_doing)) {
         if (pos && (pos.toString() == cube_pointed.value.toString())) {
@@ -126,10 +136,9 @@ const drawCubeFace = () => {
             ctx.fillStyle = COLOR_DICT[value]
             // 如果绘制的方块处于被指的魔方中则调整透明度
             if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1]) {
-                ctx.globalAlpha = 0.3
-                // 但如果指中的魔方已完成，则不调整透明度
-                if (props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) {
-                    ctx.globalAlpha = 1
+                // 但如果指中的魔方已完成，或者正在拖拽中，则不调整透明度
+                if (!(props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) && !isDragging.value) {
+                    ctx.globalAlpha = 0.3
                 }
             }
             // 如果绘制的方块没完成则调整透明度
@@ -170,16 +179,13 @@ const drawCubeFace = () => {
     }
 }
 
-watch([scale, updater], () => {
+watch([scale, updater, totalOffsetPos], () => {
     drawCubeFace()
 })
 watch(cube_pointed, (value, oldValue) => {
     if ((value.toString() !== oldValue.toString()) && !is_pointed_cube_out_of_bound.value) {
         drawCubeFace()
     }
-})
-watch(totalOffsetPos, () => {
-    drawCubeFace()
 })
 
 onMounted(() => {
