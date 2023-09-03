@@ -2,12 +2,14 @@
 
 import {COLOR_DICT} from "@/utils/wall_related";
 import {computed, onMounted, ref, watch} from "vue";
+import {ElMessage} from "element-plus";
 
 const props = defineProps<{
     cube_matrix: number[][]
     user_and_doing: object
     cubes_done: number[][]
     updater: number
+    choice: number[]
 }>()
 
 const emits = defineEmits<{
@@ -53,6 +55,25 @@ const choose = () => {
     // 越界则不管
     if (is_pointed_cube_out_of_bound.value)
         return
+    // 如果该处已被选择则拒绝选择
+    for (let pos of Object.values(props.user_and_doing)) {
+        if (pos && (pos.toString() == cube_pointed.value.toString())) {
+            ElMessage({
+                type: 'error',
+                message: '此魔方已被选择'
+            })
+            return
+        }
+    }
+    // 如果该处已完成也拒绝选择
+    if (props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) {
+        ElMessage({
+            type: 'error',
+            message: '此魔方已完成'
+        })
+        return
+    }
+
     emits('choose', cube_pointed.value)
 }
 
@@ -72,12 +93,23 @@ const drawCubeFace = () => {
             const value = props.cube_matrix[i][j]
             ctx.fillStyle = COLOR_DICT[value]
             // 如果绘制的方块处于被指的魔方中则调整透明度
-            if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1])
+            if ((Math.floor(i / 3) == cube_pointed.value[0]) && Math.floor(j / 3) == cube_pointed.value[1]) {
                 ctx.globalAlpha = 0.3
+                // 但如果指中的魔方已完成，则不调整透明度
+                if (props.cubes_done[cube_pointed.value[0]][cube_pointed.value[1]]) {
+                    ctx.globalAlpha = 1
+                }
+            }
             // 如果绘制的方块没完成则调整透明度
             else if (!props.cubes_done[Math.floor(i / 3)][Math.floor(j / 3)])
                 ctx.globalAlpha = 0
             else ctx.globalAlpha  = 1
+
+            // 如果绘制的方块是客户端的任务，则涂黑
+            if ((Math.floor(i / 3) == props.choice[0]) && Math.floor(j / 3) == props.choice[1]) {
+                ctx.fillStyle = 'purple'
+                ctx.globalAlpha = 1
+            }
             ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize)
         }
     }

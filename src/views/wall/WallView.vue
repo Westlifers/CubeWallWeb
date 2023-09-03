@@ -18,9 +18,10 @@ const wall = ref([
     [0, 0, 0]
 ])
 const cubes_done = ref([[]])
-const my_choice = ref([0, 0])
+const my_choice = ref([-1, -1])
 const my_task_cube = computed(() => {
-    return get_m_n_cube_of_wall(my_choice.value[0], my_choice.value[1], wall.value)
+    if (my_choice.value[0] < 0) return [[0, 0, 0], [0, 0, 0],[0, 0, 0]]
+    else return get_m_n_cube_of_wall(my_choice.value[0], my_choice.value[1], wall.value)
 })
 const updater = ref(0)
 
@@ -49,6 +50,7 @@ const done = () => {
         type: 'success',
         message: `你完成了第${my_choice.value[0] + 1}行第${my_choice.value[1] + 1}列的魔方`
     })
+    my_choice.value = [-1, -1]
 }
 
 
@@ -84,6 +86,7 @@ socket.onmessage = (event) => {
         :cube_matrix="wall"
         :user_and_doing="user_and_doing"
         :cubes_done="cubes_done"
+        :choice="my_choice"
         :updater="updater"
         @choose="choose" />
   </div>
