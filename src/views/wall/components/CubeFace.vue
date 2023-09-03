@@ -38,6 +38,10 @@ const min_scale = computed(() => {
     }
     return m
 })
+const max_scale = computed(() => {
+    return 10
+})
+const SCALE_STEP = computed(() => (max_scale.value - min_scale.value) / 100)
 const mouse_pos = ref([0, 0])
 const cube_pointed = computed(() => [
     Math.floor((mouse_pos.value[1] - totalOffsetPos.value[1]) / (STANDARD_CELL_SIZE * scale.value) / 3),
@@ -85,6 +89,15 @@ const endDrag = (e) => {
     // lastOffsetPos.value = totalOffsetPos.value  // wrong! 是引用类型!
     lastOffsetPos.value[0] = totalOffsetPos.value[0]
     lastOffsetPos.value[1] = totalOffsetPos.value[1]
+}
+
+const wheelScale = (e) => {
+    if (e.wheelDelta > 0) {
+        scale.value += SCALE_STEP.value
+    }
+    else {
+        scale.value -= SCALE_STEP.value
+    }
 }
 
 
@@ -210,9 +223,10 @@ onMounted(() => {
             @click="choose"
             @mousedown="startDrag"
             @mouseup="endDrag"
+            @mousewheel="wheelScale"
     />
     <div class="scaler">
-      <el-input-number v-model="scale" :precision="2" :step="0.01" :max="10" :min="min_scale" />
+      <el-input-number v-model="scale" :precision="2" :step="SCALE_STEP" :max="max_scale" :min="min_scale" />
     </div>
   </div>
 
